@@ -103,18 +103,18 @@ class shareLPACUpload(Resource):
     def post(self, session_id: str):
         upload_content = request.files.get('contentBody', None)
         if not upload_content:
-            return APIConstants.bad_end('No content provided.')
+            return APIConstants.badEnd('No content provided.')
 
         upload_name = str(upload_content.filename)
         if not upload_name.endswith('.tar'):
-            return APIConstants.bad_end('Not a tarball!')
+            return APIConstants.badEnd('Not a tarball!')
         
         if len(upload_name.replace('.tar', '').split('_')) != 3:
-            return APIConstants.bad_end('Bad file name.')
+            return APIConstants.badEnd('Bad file name.')
 
         session = UserData.getUserContent(session_id, 'lpac_upload')
         if not session:
-            return APIConstants.bad_end('No session found.')
+            return APIConstants.badEnd('No session found.')
         
         upload_path = f"{ShareServer.UPLOAD_TMP_PATH}/{upload_name}"
         try:
@@ -126,7 +126,7 @@ class shareLPACUpload(Resource):
                         break
                     f.write(chunk)
         except:
-            return APIConstants.bad_end('Failed to receive file.')
+            return APIConstants.badEnd('Failed to receive file.')
         
         extract_path = f"{ShareServer.UPLOAD_TMP_PATH}/extract"
         filelist = []
@@ -144,7 +144,7 @@ class shareLPACUpload(Resource):
                         })
             os.unlink(upload_path)
         except tarfile.TarError as e:
-            return APIConstants.bad_end(e)
+            return APIConstants.badEnd(e)
         
         for index, file in enumerate(filelist):
             filepath = f"{extract_path}/{file.get('filename')}"
@@ -161,7 +161,7 @@ class shareLPACUpload(Resource):
                     b2_path = f"game-upload/{session_id}/{file['filename']}"
                     upload_status = BackBlazeCDN().uploadUserContent(png_file.read(), b2_path)
                     if not upload_status:
-                        return APIConstants.bad_end('Failed to upload')
+                        return APIConstants.badEnd('Failed to upload')
                     file['b2_path'] = b2_path
                 os.unlink(png_path)
 
@@ -169,6 +169,6 @@ class shareLPACUpload(Resource):
 
         update_status = UserData.updateUserContentData(session_id, 'lpac_upload', {'status': 'uploaded', 'filelist': filelist})
         if update_status:
-            return APIConstants.bad_end('Failed to update data!')
+            return APIConstants.badEnd('Failed to update data!')
 
         return {"message": f"File uploaded successfully", "path": ""}, 200

@@ -25,7 +25,7 @@ class IntegrateDiscord(Resource):
         
         config = Integrations.DISCORD_CONFIG
         if not config:
-            return APIConstants.bad_end('Config isn\'t loaded!')
+            return APIConstants.badEnd('Config isn\'t loaded!')
         
         dataState, data = RequestPreCheck.checkData()
         if not dataState:
@@ -34,11 +34,11 @@ class IntegrateDiscord(Resource):
         userId = session.get('id', 0)
         user = UserData.getUser(int(userId))
         if not user:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
         
         code = data.get('code', None)
         if not code:
-            return APIConstants.bad_end('No `code`!')
+            return APIConstants.badEnd('No `code`!')
         
         try:
             auth_token_response = requests.post(config.get('token-url', ''),
@@ -58,7 +58,7 @@ class IntegrateDiscord(Resource):
             auth_token_json = auth_token_response.json()
 
             if 'error' in auth_token_json:
-                return APIConstants.bad_end(f"{auth_token_json.get('error')}, Description: {auth_token_json.get('error_description')}")
+                return APIConstants.badEnd(f"{auth_token_json.get('error')}, Description: {auth_token_json.get('error_description')}")
             else:
                 access_token = auth_token_json.get('access_token', None)
                 token_type = auth_token_json.get('token_type', None)
@@ -83,12 +83,12 @@ class IntegrateDiscord(Resource):
 
                         return 200
                     else:
-                        return APIConstants.bad_end('Failed to save discord!')
+                        return APIConstants.badEnd('Failed to save discord!')
 
         except requests.RequestException as e:
-            return APIConstants.bad_end(f"Request failed: {e}")
+            return APIConstants.badEnd(f"Request failed: {e}")
 
-        return APIConstants.bad_end('Failed to integrate with discord!')
+        return APIConstants.badEnd('Failed to integrate with discord!')
     
     def delete(self):
         '''
@@ -101,13 +101,13 @@ class IntegrateDiscord(Resource):
         userId = session.get('id', 0)
         user = UserData.getUser(int(userId))
         if not user:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
         
         update_state = UserData.updateUserData(userId, {'discord': None})
         if update_state:
             return 200
         else:
-            return APIConstants.bad_end('Failed to unlink discord!')
+            return APIConstants.badEnd('Failed to unlink discord!')
         
 class IntegrateTachi(Resource):
     def post(self):
@@ -120,7 +120,7 @@ class IntegrateTachi(Resource):
         
         config = Integrations.TACHI_CONFIG
         if not config:
-            return APIConstants.bad_end('Config isn\'t loaded!')
+            return APIConstants.badEnd('Config isn\'t loaded!')
         
         dataState, data = RequestPreCheck.checkData()
         if not dataState:
@@ -129,11 +129,11 @@ class IntegrateTachi(Resource):
         userId = session.get('id', 0)
         user = UserData.getUser(int(userId))
         if not user:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
         
         code = data.get('code', None)
         if not code:
-            return APIConstants.bad_end('No `code`!')
+            return APIConstants.badEnd('No `code`!')
         
         try:
             auth_token_response = requests.post(config.get('token-url'), json={
@@ -147,7 +147,7 @@ class IntegrateTachi(Resource):
             auth_token_json = auth_token_response.json()
             auth_token_body = auth_token_json.get('body', None)
             if not auth_token_body: 
-                return APIConstants.bad_end('Failed to integrate with tachi!')
+                return APIConstants.badEnd('Failed to integrate with tachi!')
 
             access_token = auth_token_body.get('token', None)
             if access_token:
@@ -171,12 +171,12 @@ class IntegrateTachi(Resource):
                 if update_state:
                     return 200
                 else:
-                    return APIConstants.bad_end('Failed to save tachi!')
+                    return APIConstants.badEnd('Failed to save tachi!')
 
         except requests.RequestException as e:
-            return APIConstants.bad_end(f"Request failed: {e}")
+            return APIConstants.badEnd(f"Request failed: {e}")
 
-        return APIConstants.bad_end('Failed to integrate with tachi!')
+        return APIConstants.badEnd('Failed to integrate with tachi!')
     
     def delete(self):
         '''
@@ -189,10 +189,10 @@ class IntegrateTachi(Resource):
         userId = session.get('id', 0)
         user = UserData.getUser(int(userId))
         if not user:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
         
         update_state = UserData.updateUserData(userId, {'tachi': None})
         if update_state:
             return 200
         else:
-            return APIConstants.bad_end('Failed to unlink tachi!')
+            return APIConstants.badEnd('Failed to unlink tachi!')

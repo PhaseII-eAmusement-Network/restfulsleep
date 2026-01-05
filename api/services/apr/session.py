@@ -6,11 +6,11 @@ class APRNewSession(Resource):
         request = RequestData.get_request_data()
         print(request)
 
-        return APRConstants.bad_end(0)
+        return APRConstants.badEnd(0)
     
 class APRSaveSession(Resource):
     def post(self):
         request = RequestData.get_request_data()
         print(request)
 
-        return APRConstants.bad_end(0)
+        return APRConstants.badEnd(0)

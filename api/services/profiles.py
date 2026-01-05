@@ -20,7 +20,7 @@ class Profile(Resource):
         userId = request.args.get('userId')
 
         if not userId:
-            return APIConstants.bad_end('No userId!')
+            return APIConstants.badEnd('No userId!')
         
         versions = ProfileData.getVersions(game, userId)
         if not version or version == 'null' and versions:
@@ -30,7 +30,7 @@ class Profile(Resource):
 
         profile = ProfileData.getProfile(game, version, userId)
         if not profile:
-            return APIConstants.soft_end('No profile found!')
+            return APIConstants.softEnd('No profile found!')
 
 
         profile['extid'] = GameData.getUserExtid(game, userId)
@@ -38,6 +38,13 @@ class Profile(Resource):
         payload['versions'] = versions
         payload['stats'] = GameData.getUserGameStats(game, userId)
         payload['hitChart'] = MusicData.getHitChart(game, version, 10, None, None, userId)
+
+        sessionUserId = session.get_int('id', -1)
+
+        userPublic: ValidatedDict = UserData.public(userId)
+        if not userPublic and sessionUserId != userId:
+            if not UserData.admin(sessionUserId):
+                payload['stats']['arcade_history'] = []
 
         return {
             'status': 'success',
@@ -54,28 +61,28 @@ class Profile(Resource):
         userId = request.args.get('userId')
 
         if not userId:
-            return APIConstants.bad_end('No userId!')
+            return APIConstants.badEnd('No userId!')
 
         sessionUserId = session.get_int('id', -1)
         sessionUser: ValidatedDict = UserData.getUser(sessionUserId)
         if not sessionUser:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
         
         if sessionUserId != int(userId):
             if not sessionUser.get_bool('admin'):
-                return APIConstants.bad_end('This isn\'t your profile!')
+                return APIConstants.badEnd('This isn\'t your profile!')
         
         data = request.json
         if not data:
-            return APIConstants.bad_end('No JSON data sent!')
+            return APIConstants.badEnd('No JSON data sent!')
         
         profile = ProfileData.getProfile(game, version, userId)
         if not profile:
-            return APIConstants.soft_end('No profile found!')
+            return APIConstants.softEnd('No profile found!')
 
         error_code = ProfileData.updateProfile(game, version, userId, data)
         if error_code:
-            return APIConstants.bad_end(error_code)
+            return APIConstants.badEnd(error_code)
         
         return {
             'status': 'success'
@@ -102,13 +109,13 @@ class Achievements(Resource):
             else:
                 achievements = []
         except Exception as e:
-            return APIConstants.bad_end(f'`achievements`: {e}')
+            return APIConstants.badEnd(f'`achievements`: {e}')
 
         if not userId:
-            return APIConstants.bad_end('No userId!')
+            return APIConstants.badEnd('No userId!')
         
         if not achievements:
-            return APIConstants.bad_end('`achievements: list[str: int]` needs to be supplied in headers. The format is `achievementType:achievementId,`')
+            return APIConstants.badEnd('`achievements: list[str: int]` needs to be supplied in headers. The format is `achievementType:achievementId,`')
         
         versions = ProfileData.getVersions(game, userId)
         if not version or version == 'null' and versions:
@@ -124,7 +131,7 @@ class Achievements(Resource):
                     'data': achievement,
                 })
         except:
-            return APIConstants.bad_end('Failed to parse `achievements: list[str: int]` from headers')
+            return APIConstants.badEnd('Failed to parse `achievements: list[str: int]` from headers')
         
         return {
             'status': 'success',
@@ -148,11 +155,11 @@ class Links(Resource):
         userId = int(args.get_str('userId'))
 
         if not userId:
-            return APIConstants.bad_end('No userId!')
+            return APIConstants.badEnd('No userId!')
         
         sessionUserId = session.get_int('id', -1)
         if sessionUserId != int(userId):
-            return APIConstants.bad_end('This isn\'t your profile!')
+            return APIConstants.badEnd('This isn\'t your profile!')
         
         versions = ProfileData.getVersions(game, userId)
         if not version or version == 'null' and versions:
@@ -191,21 +198,21 @@ class Link(Resource):
         linkType = data.get_str('type')
 
         if not userId:
-            return APIConstants.bad_end('No userId!')
+            return APIConstants.badEnd('No userId!')
         
         if not otherUserId:
-            return APIConstants.bad_end('No otherUserId!')
+            return APIConstants.badEnd('No otherUserId!')
         
         if not version:
-            return APIConstants.bad_end('No version!')
+            return APIConstants.badEnd('No version!')
         
         sessionUserId = session.get_int('id', -1)
         if sessionUserId != int(userId):
-            return APIConstants.bad_end('This isn\'t your profile!')
+            return APIConstants.badEnd('This isn\'t your profile!')
 
         linkState = LinkData.putLink(game, version, userId, otherUserId, linkType)
         if not linkState:
-            return APIConstants.bad_end('Failed to put link!')
+            return APIConstants.badEnd('Failed to put link!')
         
         return {
             'status': 'success',
@@ -231,21 +238,21 @@ class Link(Resource):
         linkType = data.get_str('type')
 
         if not userId:
-            return APIConstants.bad_end('No userId!')
+            return APIConstants.badEnd('No userId!')
         
         if not otherUserId:
-            return APIConstants.bad_end('No otherUserId!')
+            return APIConstants.badEnd('No otherUserId!')
         
         if not version:
-            return APIConstants.bad_end('No version!')
+            return APIConstants.badEnd('No version!')
         
         sessionUserId = session.get_int('id', -1)
         if sessionUserId != int(userId):
-            return APIConstants.bad_end('This isn\'t your profile!')
+            return APIConstants.badEnd('This isn\'t your profile!')
 
         linkState = LinkData.deleteLink(game, version, userId, otherUserId, linkType)
         if not linkState:
-            return APIConstants.bad_end('Failed to delete link!')
+            return APIConstants.badEnd('Failed to delete link!')
         
         return {
             'status': 'success',

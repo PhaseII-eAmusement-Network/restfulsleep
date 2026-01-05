@@ -25,11 +25,11 @@ class APRPlayer(Resource):
             uuid = request['uuid']
 
             if uuid == None:
-                return APRConstants.bad_end(1)
+                return APRConstants.badEnd(1)
 
             return format_player(uuid, 'deez')
 
-        else: return APRConstants.bad_end(1)
+        else: return APRConstants.badEnd(1)
 
 class APRNewPlayer(Resource):
     def post(self):
@@ -39,13 +39,13 @@ class APRNewPlayer(Resource):
             name = request['name']
 
             if uuid == None:
-                return APRConstants.bad_end(1)
+                return APRConstants.badEnd(1)
             if name == None:
-                return APRConstants.bad_end(1)
+                return APRConstants.badEnd(1)
 
             return format_player(uuid, name)
 
-        else: return APRConstants.bad_end(1)
+        else: return APRConstants.badEnd(1)
 
 class APRLinkAccount(Resource):
     def post(self):
@@ -56,15 +56,15 @@ class APRLinkAccount(Resource):
             password = request['password']
 
             if konami_id == None:
-                return APRConstants.bad_end(1)
+                return APRConstants.badEnd(1)
             if uuid == None:
-                return APRConstants.bad_end(1)
+                return APRConstants.badEnd(1)
             if password == None:
-                return APRConstants.bad_end(1)
+                return APRConstants.badEnd(1)
 
             return {'RefId': 'yes'}
 
-        else: return APRConstants.bad_end(1)
+        else: return APRConstants.badEnd(1)
 
 class APRInvited(Resource):
     def post(self):
@@ -74,15 +74,15 @@ class APRInvited(Resource):
             player_id = request['player_id']
 
             if uuid == None:
-                return APRConstants.bad_end(4)
+                return APRConstants.badEnd(4)
             if player_id == None:
-                return APRConstants.bad_end(4)
+                return APRConstants.badEnd(4)
 
             return {
                 'ErrorCode': 2,
             }
 
-        else: return APRConstants.bad_end(4)
+        else: return APRConstants.badEnd(4)
 
 class APRPresentList(Resource):
     def post(self):
@@ -91,7 +91,7 @@ class APRPresentList(Resource):
             uuid = request['uuid']
 
             if uuid == None:
-                return APRConstants.bad_end(4)
+                return APRConstants.badEnd(4)
 
             presents = []
             presents.append({
@@ -103,7 +103,7 @@ class APRPresentList(Resource):
 
             return {'PresentList': presents}
 
-        else: return APRConstants.bad_end(4)
+        else: return APRConstants.badEnd(4)
 
 class APRGetFriendList(Resource):
     def post(self):

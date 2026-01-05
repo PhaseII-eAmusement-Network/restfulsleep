@@ -43,15 +43,15 @@ class UserSession(Resource):
         password = data.get_str('password')
         remember = data.get_bool('remember')
         if username == '' or password == '':
-            return APIConstants.soft_end('No credentials provided.')
+            return APIConstants.softEnd('No credentials provided.')
         
         user = UserData.getUserByName(username)
         if not user:
-            return APIConstants.soft_end('Password incorrect or no user found.')
+            return APIConstants.softEnd('Password incorrect or no user found.')
         userId = user.get_int('id')
 
         if not UserData.validatePassword(password, userId):
-            return APIConstants.soft_end('Password incorrect or no user found.')
+            return APIConstants.softEnd('Password incorrect or no user found.')
         
         sessionAuth = SessionData.createSession(userId, 'userid', (90 * 86400) if remember else 86400)
         encryptedAuth = SessionData.AES.encrypt(sessionAuth)
@@ -77,7 +77,7 @@ class UserSession(Resource):
         if session_id:
             decryptedSession = SessionData.AES.decrypt(session_id)
             if not decryptedSession:
-                return APIConstants.bad_end('Unable to decrypt User-Auth-Key!')
+                return APIConstants.badEnd('Unable to decrypt User-Auth-Key!')
 
             SessionData.deleteSession(decryptedSession)
         
@@ -105,19 +105,19 @@ class emailAuth(Resource):
         
         email = data.get_str('email')
         if email == '':
-            return APIConstants.soft_end('No email provided.')
+            return APIConstants.softEnd('No email provided.')
         
         user = UserData.getUserByEmail(email)
         if not user:
-            return APIConstants.soft_end('No user found.')
+            return APIConstants.softEnd('No user found.')
         
         if user.get_bool('banned'):
-            return APIConstants.bad_end('You\'re banned.')
+            return APIConstants.badEnd('You\'re banned.')
         
         authKey = KeyData.createKey(user.get_int('id'), 'auth_key')
         errorState = MailjetSMTP().sendAuthKey(user.get_str('email'), authKey)
         if errorState:
-            return APIConstants.bad_end(errorState)
+            return APIConstants.badEnd(errorState)
 
         return {'status': 'success'}
     
@@ -135,18 +135,18 @@ class check2FAKey(Resource):
         key = data.get_str('key')
 
         if len(key) != 6:
-            return APIConstants.bad_end('Incorrect key length.')
+            return APIConstants.badEnd('Incorrect key length.')
         
         key_status = KeyData.checkKey(key, 'auth_key')
         if not key_status.get_bool('active'):
-            return APIConstants.bad_end('No key found.')
+            return APIConstants.badEnd('No key found.')
         
         user = UserData.getUser(key_status.get_int('id'))
         if not user:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
         
         if user.get_bool('banned'):
-            return APIConstants.bad_end('You\'re still banned.')
+            return APIConstants.badEnd('You\'re still banned.')
     
         return {'status': 'success', 'username': user.get('username')}
     
@@ -167,38 +167,38 @@ class resetPassword(Resource):
         
         newPassword = data.get_str('newPassword')
         if newPassword == '':
-            return APIConstants.bad_end('No password provided.')
+            return APIConstants.badEnd('No password provided.')
         
         confirmPassword = data.get_str('confirmPassword')
         if confirmPassword == '':
-            return APIConstants.bad_end('No password confirmation provided.')
+            return APIConstants.badEnd('No password confirmation provided.')
         
         if len(newPassword) < 8:
-            return APIConstants.soft_end('Password must be at least 8 characters!')
+            return APIConstants.softEnd('Password must be at least 8 characters!')
         
         if newPassword != confirmPassword:
-            return APIConstants.soft_end('The passwords don\'t match!')
+            return APIConstants.softEnd('The passwords don\'t match!')
 
         if len(key) != 6:
-            return APIConstants.bad_end('Bad key format.')
+            return APIConstants.badEnd('Bad key format.')
         
         key_status = KeyData.checkKey(key, 'auth_key')
         if not key_status.get_bool('active'):
-            return APIConstants.bad_end('No key found.')
+            return APIConstants.badEnd('No key found.')
         
         user = UserData.getUser(key_status.get_int('id'))
         if not user:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
         
         if user.get_bool('banned'):
-            return APIConstants.bad_end('You\'re still banned.')
+            return APIConstants.badEnd('You\'re still banned.')
         
         KeyData.deleteKey(key, 'auth_key')
         if UserData.updatePassword(user.get_int('id'), newPassword) == True:
             errorState = MailjetSMTP().passwordChanged(user.get_str('email'))
             if errorState:
-                return APIConstants.bad_end(errorState)
+                return APIConstants.badEnd(errorState)
 
             return {'status': 'success'}
         else:
-            return APIConstants.bad_end('Failed to reset!')
+            return APIConstants.badEnd('Failed to reset!')

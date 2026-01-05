@@ -19,7 +19,7 @@ class getAllNews(Resource):
             try:
                 limit = int(args.get_str('limit'))
             except Exception as e:
-                return APIConstants.bad_end(str(e))
+                return APIConstants.badEnd(str(e))
         
         data = NewsData.getAllNews(limit)
         return data, 200

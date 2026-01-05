@@ -2,7 +2,7 @@ from flask import request
 from typing import Dict
 
 class APRConstants:
-    def bad_end(error: int) -> dict:
+    def badEnd(error: int) -> dict:
         return {'ErrorCode': error}
 
 class RequestData:

@@ -60,7 +60,7 @@ class TopScore(Resource):
         
         songData = MusicData.getSongByGameId(game, songId)
         if not songData:
-            return APIConstants.bad_end('Failed to find song!')
+            return APIConstants.badEnd('Failed to find song!')
         
         for index, chart in enumerate(songData.get('charts')):
             chartRecords = ScoreData.getRecords(game, chart.get('db_id', None))

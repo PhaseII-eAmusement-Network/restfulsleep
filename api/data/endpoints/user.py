@@ -25,6 +25,24 @@ class UserData:
                 return True
             else:
                 return False
+            
+    def public(userId: int) -> ValidatedDict:
+        with MySQLBase.SessionLocal() as session:
+            userPublic = session.query(User.public).filter(User.id == userId).first()
+
+            if userPublic is not None and userPublic[0]:
+                return True
+            else:
+                return False
+            
+    def admin(userId: int) -> ValidatedDict:
+        with MySQLBase.SessionLocal() as session:
+            userAdmin = session.query(User.admin).filter(User.id == userId).first()
+
+            if userAdmin is not None and userAdmin[0]:
+                return True
+            else:
+                return False
 
     def getUser(userId: int) -> ValidatedDict:
         with MySQLBase.SessionLocal() as session:

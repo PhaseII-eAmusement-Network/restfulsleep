@@ -8,15 +8,15 @@ class RequestPreCheck:
     def getSession() -> Tuple[bool, ValidatedDict]:
         session_id = request.cookies.get('User-Auth-Key')
         if not session_id:
-            return (False, APIConstants.bad_end('No User-Auth-Key provided!'))
+            return (False, APIConstants.badEnd('No User-Auth-Key provided!'))
         
         decryptedSession = SessionData.AES.decrypt(session_id)
         if not decryptedSession:
-            return (False, APIConstants.bad_end('Unable to decrypt User-Auth-Key!'))
+            return (False, APIConstants.badEnd('Unable to decrypt User-Auth-Key!'))
 
         session = SessionData.checkSession(decryptedSession)
         if not session or session.get('active') != True:
-            return (False, APIConstants.bad_end('No session found!'))
+            return (False, APIConstants.badEnd('No session found!'))
 
         return (True, session)
     
@@ -28,7 +28,7 @@ class RequestPreCheck:
         user = UserData.getUser(userId)
 
         if not user.get("admin", False):
-            return (False, APIConstants.bad_end('You must have administrative rights.'))
+            return (False, APIConstants.badEnd('You must have administrative rights.'))
         
         return (True, None)
     
@@ -41,7 +41,7 @@ class RequestPreCheck:
         '''
         data = request.get_json(silent=True)
         if data is None:
-            return False, APIConstants.bad_end("No JSON data was sent!")
+            return False, APIConstants.badEnd("No JSON data was sent!")
 
         data = ValidatedDict(data)
 
@@ -59,7 +59,7 @@ class RequestPreCheck:
                     changed_val = key_type(data.get(key, None))
                     data[key] = changed_val
                 except:
-                    return False, APIConstants.bad_end(f"`{key}` type {key_type.__name__} not found!\nFailed to find and convert type.")
+                    return False, APIConstants.badEnd(f"`{key}` type {key_type.__name__} not found!\nFailed to find and convert type.")
 
         return True, data
     
@@ -72,7 +72,7 @@ class RequestPreCheck:
         '''
         data = request.args
         if data is None:
-            return False, APIConstants.bad_end("No args sent!")
+            return False, APIConstants.badEnd("No args sent!")
 
         data = ValidatedDict(data)
 
@@ -90,6 +90,6 @@ class RequestPreCheck:
                     changed_val = key_type(data.get(key, None))
                     data[key] = changed_val
                 except:
-                    return False, APIConstants.bad_end(f"`{key}` type {key_type.__name__} not found!\nFailed to find and convert type.")
+                    return False, APIConstants.badEnd(f"`{key}` type {key_type.__name__} not found!\nFailed to find and convert type.")
 
         return True, data

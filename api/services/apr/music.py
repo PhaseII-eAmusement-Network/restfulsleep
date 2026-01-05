@@ -8,14 +8,14 @@ class APRRecommendList(Resource):
             uuid = request['uuid']
 
             if uuid == None:
-                return APRConstants.bad_end('bad uuid!')
+                return APRConstants.badEnd('bad uuid!')
 
             return {
                 'List': [],
                 'Over': []
             }
 
-        else: return APRConstants.bad_end('bad request!')
+        else: return APRConstants.badEnd('bad request!')
 
 class APRPackList(Resource):
     def get(self):

@@ -17,10 +17,10 @@ class Music(Resource):
         oneChart = request.args.get('oneChart')
 
         if not version:
-            return APIConstants.bad_end('No version provided!')
+            return APIConstants.badEnd('No version provided!')
         
         if not game:
-            return APIConstants.bad_end('No game provided!')
+            return APIConstants.badEnd('No game provided!')
         
         filteredSongIds = None
         if songIds:

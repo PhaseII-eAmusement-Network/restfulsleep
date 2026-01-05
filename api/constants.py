@@ -9,10 +9,10 @@ def intish(val: Any, base: int=10) -> Optional[int]:
         return None
 
 class APIConstants:
-    def bad_end(error: str) -> dict:
+    def badEnd(error: str) -> dict:
         return {'status': 'error', 'error_code': error}
     
-    def soft_end(error: str) -> dict:
+    def softEnd(error: str) -> dict:
         return {'status': 'warn', 'error_code': error}
     
 class GameConstants:

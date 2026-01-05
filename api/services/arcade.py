@@ -27,7 +27,7 @@ class Arcade(Resource):
         
         arcade = ArcadeData.getArcade(arcadeId)
         if not arcade:
-            return APIConstants.bad_end('Unable to load the arcade!')
+            return APIConstants.badEnd('Unable to load the arcade!')
         
         if authUser:
             filteredOwners = []
@@ -57,11 +57,11 @@ class Arcade(Resource):
         
         userId = session.get_int('id')
         if not ArcadeData.checkOwnership(userId, arcadeId):
-            return APIConstants.bad_end('You don\'t have access to this arcade!')
+            return APIConstants.badEnd('You don\'t have access to this arcade!')
         
         arcade = ArcadeData.getArcade(arcadeId)
         if not arcade:
-            return APIConstants.bad_end('Unable to load the arcade!')
+            return APIConstants.badEnd('Unable to load the arcade!')
         
         dataState, data = RequestPreCheck.checkData()
         if not dataState:
@@ -69,7 +69,7 @@ class Arcade(Resource):
 
         error_code = ArcadeData.updateArcadeData(arcadeId, data)
         if error_code:
-            return APIConstants.bad_end(error_code)
+            return APIConstants.badEnd(error_code)
         
         return {
             'status': 'success'
@@ -99,7 +99,7 @@ class ArcadeSettings(Resource):
         
         arcade = ArcadeData.getArcade(arcadeId)
         if not arcade:
-            return APIConstants.bad_end('Unable to load the arcade!')
+            return APIConstants.badEnd('Unable to load the arcade!')
         
         game = args.get_str('game')
         version = args.get_int('version')
@@ -107,7 +107,7 @@ class ArcadeSettings(Resource):
             arcade_settings = ArcadeData.getArcadeSettings(arcadeId, game, version, 'game_config')
             return {'status': 'success', 'data': arcade_settings if arcade_settings else {}}
         
-        return APIConstants.bad_end('Unauthorized.')
+        return APIConstants.badEnd('Unauthorized.')
     
     def post(self, arcadeId: int):
         sessionState, session = RequestPreCheck.getSession()
@@ -127,17 +127,17 @@ class ArcadeSettings(Resource):
         
         userId = session.get_int('id')
         if not ArcadeData.checkOwnership(userId, arcadeId):
-            return APIConstants.bad_end('Unauthorized.')
+            return APIConstants.badEnd('Unauthorized.')
         
         arcade = ArcadeData.getArcade(arcadeId)
         if not arcade:
-            return APIConstants.bad_end('Unable to load the arcade!')
+            return APIConstants.badEnd('Unable to load the arcade!')
         
         game = args.get_str('game')
         version = args.get_int('version')
         update_state = ArcadeData.updateArcadeSettings(arcadeId, game, version, 'game_config', data)
         if update_state:
-            return APIConstants.bad_end(update_state)
+            return APIConstants.badEnd(update_state)
 
         return {'status': 'success'}
     
@@ -153,11 +153,11 @@ class VPN(Resource):
         
         userId = session.get_int('id')
         if not ArcadeData.checkOwnership(userId, arcadeId):
-            return APIConstants.bad_end('You don\'t own this arcade or it doesn\'t exist!')
+            return APIConstants.badEnd('You don\'t own this arcade or it doesn\'t exist!')
         
         arcade = ArcadeData.getArcade(arcadeId)
         if not arcade:
-            return APIConstants.bad_end('Unable to load the arcade!')
+            return APIConstants.badEnd('Unable to load the arcade!')
 
         arcade_config = PFSense.export_vpn_profile(arcade)
         
@@ -168,7 +168,7 @@ class VPN(Resource):
                 headers={"Content-Disposition": f"attachment;filename=gradius-{arcade_config[1]}-phaseii-config.ovpn"}
             )
         else:
-            return APIConstants.bad_end('Failed to export!')
+            return APIConstants.badEnd('Failed to export!')
     
 class Paseli(Resource):
     '''
@@ -181,7 +181,7 @@ class Paseli(Resource):
         
         userId = session.get_int('id')
         if not ArcadeData.checkOwnership(userId, arcadeId):
-            return APIConstants.bad_end('You don\'t own this arcade or it doesn\'t exist!')
+            return APIConstants.badEnd('You don\'t own this arcade or it doesn\'t exist!')
         
         returnData = {}
         balances = PaseliData.getArcadeBalances(arcadeId)
@@ -211,7 +211,7 @@ class Paseli(Resource):
         
         userId = session.get_int('id')
         if not ArcadeData.checkOwnership(userId, arcadeId):
-            return APIConstants.bad_end('You don\'t own this arcade or it doesn\'t exist!')
+            return APIConstants.badEnd('You don\'t own this arcade or it doesn\'t exist!')
         
         dataState, data = RequestPreCheck.checkData({'cardId': str, 'credit': int})
         if not dataState:
@@ -223,9 +223,9 @@ class Paseli(Resource):
                 try:
                     cardId = str(data.get('cardId', None))
                 except:
-                    return APIConstants.bad_end('Invalid cardId.')
+                    return APIConstants.badEnd('Invalid cardId.')
             else:
-                return APIConstants.bad_end('No cardId provided!')
+                return APIConstants.badEnd('No cardId provided!')
             
             try:
                 cardId = CardCipher.decode(cardId)
@@ -233,7 +233,7 @@ class Paseli(Resource):
                 try:
                     CardCipher.encode(cardId)
                 except:
-                    return APIConstants.bad_end('Bad cardId encoding!')
+                    return APIConstants.badEnd('Bad cardId encoding!')
 
             reqUserId = UserData.cardExist(cardId)
 
@@ -241,7 +241,7 @@ class Paseli(Resource):
 
         reqUser = UserData.getUser(reqUserId)
         if not reqUser:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
         
         PaseliData.putArcadeBalance(arcadeId, reqUserId, data.get_int('credit'))
         PaseliData.putTransaction(arcadeId, reqUserId, data.get_int('credit'))
@@ -294,7 +294,7 @@ class CheckPCBID(Resource):
             return args
         
         if len(args.get_str('PCBID')) != 20:
-            return APIConstants.bad_end('PCBID must be 20 characters!')
+            return APIConstants.badEnd('PCBID must be 20 characters!')
         
         validArcade = True
         if MachineData.fromPCBID(args.get_str('PCBID')):
@@ -317,7 +317,7 @@ class ArcadeTakeover(Resource):
             userId = session.get_int('id')
 
         if not userId:
-            return APIConstants.bad_end('Bad session!')
+            return APIConstants.badEnd('Bad session!')
         
         argsState, args = RequestPreCheck.checkArgs({
             'PCBID': str,
@@ -327,14 +327,14 @@ class ArcadeTakeover(Resource):
         
         machine = MachineData.fromPCBID(args.get_str('PCBID'))
         if not machine:
-            return APIConstants.bad_end('No machine found!')
+            return APIConstants.badEnd('No machine found!')
 
         owners = ArcadeData.getArcadeOwners(machine.get_int('arcadeId'))
         if owners:
-            return APIConstants.bad_end('Arcade already claimed!')
+            return APIConstants.badEnd('Arcade already claimed!')
         
         if len(owners) != 0:
-            return APIConstants.bad_end('Arcade already claimed!')
+            return APIConstants.badEnd('Arcade already claimed!')
 
         arcade = ArcadeData.getArcade(machine.get_int('arcadeId'))
         machines = MachineData.getArcadeMachines(machine.get_int('arcadeId'))
@@ -357,23 +357,23 @@ class ArcadeTakeover(Resource):
             userId = session.get_int('id')
 
         if not userId:
-            return APIConstants.bad_end('Bad session!')
+            return APIConstants.badEnd('Bad session!')
 
         PCBID = data.get_str('PCBID')
         
         machine = MachineData.fromPCBID(PCBID)
         if not machine:
-            return APIConstants.bad_end('No machine found!')
+            return APIConstants.badEnd('No machine found!')
 
         owners = ArcadeData.getArcadeOwners(machine.get_int('arcadeId'))
         if owners:
-            return APIConstants.bad_end('Arcade already claimed!')
+            return APIConstants.badEnd('Arcade already claimed!')
         
         if len(owners) != 0:
-            return APIConstants.bad_end('Arcade already claimed!')
+            return APIConstants.badEnd('Arcade already claimed!')
 
         saveState = ArcadeData.putArcadeOwner(machine.get_int('arcadeId'), userId)
         if not saveState:
-            return APIConstants.bad_end('Failed to transfer arcade.')
+            return APIConstants.badEnd('Failed to transfer arcade.')
 
         return {'status': 'success'}

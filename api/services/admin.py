@@ -79,7 +79,7 @@ class AdminArcade(Resource):
         
         error_code = ArcadeData.updateArcadeNameDesc(arcadeId, formattedArcade.get('name', ''), formattedArcade.get('description', ''), formattedArcade.get('beta', False))
         if error_code:
-            return APIConstants.bad_end(error_code)
+            return APIConstants.badEnd(error_code)
         
         return {
             'status': 'success'
@@ -99,7 +99,7 @@ class AdminArcade(Resource):
         
         error_state = ArcadeData.deleteArcade(arcadeId)
         if not error_state:
-            return APIConstants.bad_end("Failed to delete arcade.")
+            return APIConstants.badEnd("Failed to delete arcade.")
         
         return {
             'status': 'success'
@@ -124,7 +124,7 @@ class AdminArcadeOwner(Resource):
         
         success = ArcadeData.putArcadeOwner(arcadeId, data.get_int('ownerId'))
         if not success:
-            return APIConstants.bad_end("Failed to add arcade owner!")
+            return APIConstants.badEnd("Failed to add arcade owner!")
         
         return {
             'status': 'success'
@@ -148,7 +148,7 @@ class AdminArcadeOwner(Resource):
         
         success = ArcadeData.removeArcadeOwner(arcadeId, data.get_int('ownerId'))
         if not success:
-            return APIConstants.bad_end("Failed to remove arcade owner!")
+            return APIConstants.badEnd("Failed to remove arcade owner!")
         
         return {
             'status': 'success'
@@ -183,7 +183,7 @@ class AdminArcadeMachine(Resource):
         
         machine = MachineData.putMachine(None, arcadeId, formattedMachine)
         if not machine:
-            return APIConstants.bad_end('Failed to add machine')
+            return APIConstants.badEnd('Failed to add machine')
         
         return {
             'status': 'success'
@@ -217,11 +217,11 @@ class AdminArcadeMachine(Resource):
 
         oldMachine = MachineData.fromPCBID(formattedMachine.get('PCBID'))
         if not oldMachine:
-            return APIConstants.bad_end('PCBID not found.')
+            return APIConstants.badEnd('PCBID not found.')
         
         machine = MachineData.putMachine(oldMachine.get_int('id'), arcadeId, formattedMachine)
         if not machine:
-            return APIConstants.bad_end('Failed to add machine')
+            return APIConstants.badEnd('Failed to add machine')
         
         return {
             'status': 'success'
@@ -249,7 +249,7 @@ class AdminArcadeMachine(Resource):
         
         deleteState = MachineData.deleteMachine(formattedMachine.get('PCBID'))
         if not deleteState:
-            return APIConstants.bad_end('Failed to delete machine!')
+            return APIConstants.badEnd('Failed to delete machine!')
         
         return {
             'status': 'success'
@@ -291,7 +291,7 @@ class OnboardArcade(Resource):
 
             memberData = BadManiac.getDiscordMember(discordId)
             if not memberData:
-                return APIConstants.bad_end(f'Failed to get user\'s Discord account.')
+                return APIConstants.badEnd(f'Failed to get user\'s Discord account.')
 
             formattedArcade['description'] = f"{memberData['username']}'s Arcade"
             
@@ -326,11 +326,11 @@ class AdminMachinePCBID(Resource):
             return errorCode
         
         if len(PCBID) != 20:
-            return APIConstants.bad_end('PCBID must be 20 characters!')
+            return APIConstants.badEnd('PCBID must be 20 characters!')
         
         machine = MachineData.fromPCBID(PCBID)
         if not machine:
-            return APIConstants.soft_end('PCBID not found.')
+            return APIConstants.softEnd('PCBID not found.')
 
         return {
             'status': 'success',
@@ -365,13 +365,13 @@ class Maintenance(Resource):
         
         endTimestamp = data.get('endTimestamp', None)
         if not endTimestamp:
-            return APIConstants.bad_end('No endTimestamp!')
+            return APIConstants.badEnd('No endTimestamp!')
         formattedEnd = (int(endTimestamp / 1000))
 
         try:
             AdminData.putAuditEvent('maintenance', session.get('id', 0), None, {'endTimestamp': formattedEnd, 'reason': data.get('reason', '')})
         except Exception as e:
-            return APIConstants.bad_end(str(e))
+            return APIConstants.badEnd(str(e))
 
         return {'status': 'success'}
     
@@ -403,10 +403,10 @@ class Client(Resource):
         
         name = data.get_str('name', None)
         if not name: 
-            return APIConstants.bad_end('No name provided!')
+            return APIConstants.badEnd('No name provided!')
         
         if not AdminData.putClient(name):
-            return APIConstants.bad_end('Failed to put client!')
+            return APIConstants.badEnd('Failed to put client!')
         
         audit = AdminData.getAllClients()
         return {'status': 'success', 'data': audit}
@@ -432,7 +432,7 @@ class AdminUsers(Resource):
         try:
             noData = bool(noData)
         except:
-            return APIConstants.bad_end('noData was provided but it isn\'t a bool!')
+            return APIConstants.badEnd('noData was provided but it isn\'t a bool!')
         
         users = AdminData.getAllUsers()
         return {'status': 'success', 'data': users}
@@ -463,42 +463,42 @@ class AdminUser(Resource):
         try:
             userId = int(userId)
         except:
-            return APIConstants.bad_end('userId must be an integer!')
+            return APIConstants.badEnd('userId must be an integer!')
 
         if not userId:
-            return APIConstants.bad_end('No userId!')
+            return APIConstants.badEnd('No userId!')
 
         if data.get('name', None):
             try:
                 username = str(data.get('name', None))
             except:
-                return APIConstants.bad_end('Invalid name!')
+                return APIConstants.badEnd('Invalid name!')
             
             existingUser = UserData.getUserByName(username)
             if existingUser and existingUser.get('id') != userId:
-                return APIConstants.bad_end('Username already taken.')
+                return APIConstants.badEnd('Username already taken.')
 
         if data.get('email', None):
             try:
                 email = str(data.get('email', None))
             except:
-                return APIConstants.bad_end('Invalid email!')
+                return APIConstants.badEnd('Invalid email!')
 
             splitEmail = email.split('@')
             if len(splitEmail) != 2:
-                return APIConstants.bad_end('Invalid email!')
+                return APIConstants.badEnd('Invalid email!')
             
             if len(splitEmail[1].split('.')) != 2:
-                return APIConstants.bad_end('Invalid email!')
+                return APIConstants.badEnd('Invalid email!')
 
         if data.get('pin', None):
             try:
                 pin = str(data.get('pin', None))
             except:
-                return APIConstants.bad_end('Invalid pin!')
+                return APIConstants.badEnd('Invalid pin!')
             
             if len(pin) != 4 and len(pin) != 0:
-                return APIConstants.bad_end('PIN must be 4 characters!')
+                return APIConstants.badEnd('PIN must be 4 characters!')
             
             if len(pin) == 0:
                 pin = None # If it's an empty string, we'll just forget it.
@@ -507,18 +507,18 @@ class AdminUser(Resource):
             try:
                 public = bool(data.get('public', False))
             except:
-                return APIConstants.bad_end('Invalid public!')
+                return APIConstants.badEnd('Invalid public!')
 
         if data.get('banned', None) != None:
             try:
                 banned = bool(data.get('banned', False))
             except:
-                return APIConstants.bad_end('Invalid banned!')
+                return APIConstants.badEnd('Invalid banned!')
             
         if UserData.updateUser(userId, username, email, pin, public, banned):
             return {'status': 'success'}
 
-        return APIConstants.bad_end('Failed to save!')
+        return APIConstants.badEnd('Failed to save!')
     
 class AdminUserUpdatePassword(Resource):
     def post(self, userId: int):
@@ -539,26 +539,26 @@ class AdminUserUpdatePassword(Resource):
         
         newPassword = data.get('newPassword', None)
         if newPassword == None:
-            return APIConstants.bad_end('No newPassword provided.')
+            return APIConstants.badEnd('No newPassword provided.')
         
         confirmPassword = data.get('confirmPassword', None)
         if confirmPassword == None:
-            return APIConstants.bad_end('No confirmPassword confirmation provided.')
+            return APIConstants.badEnd('No confirmPassword confirmation provided.')
         
         if len(str(newPassword)) < 8:
-            return APIConstants.soft_end('Password must be at least 8 characters!')
+            return APIConstants.softEnd('Password must be at least 8 characters!')
         
         if newPassword != confirmPassword:
-            return APIConstants.soft_end('The passwords don\'t match!')
+            return APIConstants.softEnd('The passwords don\'t match!')
         
         user = UserData.getUser(userId)
         if not user:
-            return APIConstants.bad_end('No user found.')
+            return APIConstants.badEnd('No user found.')
 
         if UserData.updatePassword(userId, newPassword) == True:
             return {'status': 'success'}
         else:
-            return APIConstants.bad_end('Failed to update password!')
+            return APIConstants.badEnd('Failed to update password!')
 
 class AdminUserCardId(Resource):
     '''
@@ -574,16 +574,16 @@ class AdminUserCardId(Resource):
             return errorCode
         
         if len(cardId) != 16:
-            return APIConstants.bad_end('cardId must be 16 characters!')
+            return APIConstants.badEnd('cardId must be 16 characters!')
         
         try:
             cardId = CardCipher.decode(cardId)
         except:
-            return APIConstants.soft_end('Bad encoding!')
+            return APIConstants.softEnd('Bad encoding!')
         
         userId = UserData.cardExist(cardId)
         if not userId:
-            return APIConstants.soft_end('Card not found!')
+            return APIConstants.softEnd('Card not found!')
 
         return {'status': 'success', 'data': {'id': userId}}
     
@@ -615,18 +615,18 @@ class AdminNews(Resource):
         
         title = data.get_str('title', None)
         if not title: 
-            return APIConstants.bad_end('No title provided!')
+            return APIConstants.badEnd('No title provided!')
         
         body = data.get_str('body', None)
         if not body: 
-            return APIConstants.bad_end('No body provided!')
+            return APIConstants.badEnd('No body provided!')
         
         data = data.get_dict('data', None)
         if not data: 
-            return APIConstants.bad_end('No data provided!')
+            return APIConstants.badEnd('No data provided!')
         
         if not AdminData.putNews(title, body, data):
-            return APIConstants.bad_end('Failed to put news!')
+            return APIConstants.badEnd('Failed to put news!')
         
         news = AdminData.getAllNews()
         return {'status': 'success', 'data': news}
@@ -647,18 +647,18 @@ class AdminNewsPost(Resource):
         
         title = data.get_str('title', None)
         if not title: 
-            return APIConstants.bad_end('No title provided!')
+            return APIConstants.badEnd('No title provided!')
         
         body = data.get_str('body', None)
         if not body: 
-            return APIConstants.bad_end('No body provided!')
+            return APIConstants.badEnd('No body provided!')
         
         data = data.get_dict('data', None)
         if not data: 
-            return APIConstants.bad_end('No data provided!')
+            return APIConstants.badEnd('No data provided!')
         
         if not AdminData.putNews(title, body, data, newsId):
-            return APIConstants.bad_end('Failed to put news!')
+            return APIConstants.badEnd('Failed to put news!')
         
         return {'status': 'success'}
 
@@ -672,7 +672,7 @@ class AdminNewsPost(Resource):
             return errorCode
         
         if not AdminData.deleteNews(newsId):
-            return APIConstants.bad_end('Failed to delete news!')
+            return APIConstants.badEnd('Failed to delete news!')
         
         return {'status': 'success'}
     

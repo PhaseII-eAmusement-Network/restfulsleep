@@ -23,11 +23,11 @@ class PCBIDRequest(Resource):
         
         arcade = ArcadeData.getArcade(arcadeId)
         if not arcade:
-            return APIConstants.bad_end('Unable to load the arcade!')
+            return APIConstants.badEnd('Unable to load the arcade!')
         
         discordId = request.args.get('discordId')
         if not discordId:
-            return APIConstants.bad_end('No Discord ID!')
+            return APIConstants.badEnd('No Discord ID!')
         
         failedResponse = BadManiac.sendArcadeVPN(discordId, arcadeId)
         if failedResponse == None:
