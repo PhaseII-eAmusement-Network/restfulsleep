@@ -664,6 +664,38 @@ class UserAppVersion(Resource):
             return {'status': 'success'}
 
         return APIConstants.badEnd('Failed to update!')
+
+class UserOnboard(Resource):
+    '''
+    Handle updating onboarding data
+    '''
+    def post(self):
+        sessionState, session = RequestPreCheck.getSession()
+        if not sessionState:
+            return session
+        session = ValidatedDict(session)
+
+        dataState, data = RequestPreCheck.checkData({'version': str, 'disable': bool})
+        if not dataState:
+            return data
+        data = ValidatedDict(data)
+        
+        userId = session.get_int('id')
+        user = UserData.getUser(userId)
+        if not user:
+            return APIConstants.badEnd('No user found.')
+        
+        # Any web version data before this is from beta, we shall move it to a new dict.
+        # We will also add the current version into the new data.
+        webVersionsBeta = user.get_dict('data').get('webVersions', [])
+        version = data.get_str('version')
+        webVersions = [version]
+
+        update_state = UserData.updateUserData(userId, {'webVersions': webVersions, 'webVersionsBeta': webVersionsBeta, 'onboardingComplete': True})
+        if update_state:
+            return {'status': 'success'}
+
+        return APIConstants.badEnd('Failed to update!')
     
 class UserReadNews(Resource):
     '''

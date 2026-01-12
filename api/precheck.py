@@ -8,7 +8,7 @@ class RequestPreCheck:
     def getSession() -> Tuple[bool, ValidatedDict]:
         session_id = request.cookies.get('User-Auth-Key')
         if not session_id:
-            return (False, APIConstants.badEnd('No User-Auth-Key provided!'))
+            return (False, APIConstants.softEnd('No User-Auth-Key provided!'))
         
         decryptedSession = SessionData.AES.decrypt(session_id)
         if not decryptedSession:

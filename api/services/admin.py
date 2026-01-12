@@ -35,7 +35,7 @@ class AdminAudit(Resource):
         
         auditData = {}
 
-        auditKeys = ['avs_updater', 'exception', 'iidx_daily_charts', 'iidx_weekly', 'jubeat_fc_challenge_charts', 'jubeat_league_course', 'paseli_transaction', 'pcbevent', 'pnm_course', 'unhandled_packet']
+        auditKeys = ['avs_updater', 'exception', 'iidx_daily_charts', 'iidx_weekly', 'jubeat_fc_challenge_charts', 'jubeat_league_course', 'paseli_transaction', 'pcbevent', 'pnm_course', 'unhandled_packet', 'unauthorized_pcbid']
         for key in auditKeys:
             auditData[key] = AdminData.getRecentAuditEvents(200, key)
 
