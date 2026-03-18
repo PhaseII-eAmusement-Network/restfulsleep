@@ -68,5 +68,6 @@
         "usergamedata",
         "userid",
         "wncp"
-    ]
+    ],
+    "chat.disableAIFeatures": true
 }
