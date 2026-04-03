@@ -85,8 +85,12 @@ class UserAccount(Resource):
                     'id': arcade,
                     'name': ArcadeData.getArcadeName(arcade)
                 })
-
-        scoreStats = ScoreData.getUserStats(reqUserId)
+        
+        noScores = args.get_str('noScores', None)
+        if noScores:
+            scoreStats = None
+        else:
+            scoreStats = ScoreData.getUserStats(reqUserId)
 
         return {
             'status': 'success',

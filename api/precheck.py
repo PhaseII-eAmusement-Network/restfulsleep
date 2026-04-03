@@ -1,16 +1,22 @@
 from flask import request
 from typing import Tuple
 from api.constants import APIConstants, ValidatedDict
-from api.data.endpoints.session import SessionData
+from api.data.endpoints.session import SessionData, TokenData
 from api.data.endpoints.user import UserData
+from api.external.unity import UnityAPI
 
 class RequestPreCheck:
     def getSession() -> Tuple[bool, ValidatedDict]:
-        session_id = request.cookies.get('User-Auth-Key')
-        if not session_id:
+        sessionId = request.cookies.get('User-Auth-Key')
+        appId = None
+        if not sessionId:
+            # Attempt to check for a bearer token and app ID
+            auth = RequestPreCheck.getAuthorization()
+            if auth:
+                return auth
             return (False, APIConstants.softEnd('No User-Auth-Key provided!'))
         
-        decryptedSession = SessionData.AES.decrypt(session_id)
+        decryptedSession = SessionData.AES.decrypt(sessionId)
         if not decryptedSession:
             return (False, APIConstants.badEnd('Unable to decrypt User-Auth-Key!'))
 
@@ -19,6 +25,34 @@ class RequestPreCheck:
             return (False, APIConstants.badEnd('No session found!'))
 
         return (True, session)
+    
+    def getAuthorization() -> Tuple[bool, ValidatedDict]:
+        unityKey = request.headers['X-Unity-Key']
+        if unityKey:
+            appId = 'unity'
+            if unityKey != UnityAPI.UNITY_PSK:
+                return (False, APIConstants.softEnd('X-Unity-Key provided is incorrect'))
+            
+            authorization = request.headers['Authorization']
+            if not authorization:
+                return (False, APIConstants.softEnd('No Authorization provided!'))
+            try:
+                bearer, token = authorization.split(' ')
+                if bearer != 'Bearer':
+                    return (False, APIConstants.softEnd('No Bearer provided!'))
+            except Exception as e:
+                return (False, APIConstants.badEnd(e))
+
+            try:
+                token = SessionData.AES.decrypt(token)
+            except Exception as e:
+                return (False, APIConstants.badEnd(e))
+
+            tokenData = TokenData.checkToken(token, f"{appId}_token")
+            if not tokenData or tokenData.get('active') != True:
+                return (False, APIConstants.badEnd('No token found!'))
+            tokenData['authorization_token'] = token
+            return (True, tokenData)
     
     def checkAdmin(session: ValidatedDict) -> Tuple[bool, ValidatedDict]:
         '''
@@ -93,3 +127,4 @@ class RequestPreCheck:
                     return False, APIConstants.badEnd(f"`{key}` type {key_type.__name__} not found!\nFailed to find and convert type.")
 
         return True, data
+    

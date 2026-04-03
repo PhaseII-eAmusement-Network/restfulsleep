@@ -9,6 +9,9 @@ def intish(val: Any, base: int=10) -> Optional[int]:
         return None
 
 class APIConstants:
+    def goodEnd(data: dict) -> dict:
+        return {'status': 'success', 'error_code': None, 'data': data}
+
     def badEnd(error: str) -> dict:
         return {'status': 'error', 'error_code': error}
     

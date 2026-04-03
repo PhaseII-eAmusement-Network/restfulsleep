@@ -13,6 +13,7 @@ from api.data.endpoints.session import SessionData
 from api.external.pfsense import PFSense
 from api.external.backblaze import BackBlazeCDN
 from api.external.mailjet import MailjetSMTP
+from api.external.unity import UnityAPI
 
 # Bad Maniac Discord Bot
 from api.external.badmaniac import BadManiac
@@ -23,6 +24,7 @@ from api.services.admin import AdminDashboard, AdminAudit, AdminArcade, AdminArc
 from api.services.arcade import Arcade, ArcadeSettings, Paseli, VPN, CheckArcadeName, CheckPCBID, ArcadeTakeover
 from api.services.news import getAllNews, getNews
 from api.services.auth import UserSession, emailAuth, check2FAKey, resetPassword
+from api.services.oauth import OAuthClient, OAuthToken
 from api.services.user import UserAccount, UserUpdatePassword, UserCard, UserTakeover, UserPlayVideos, UserContent, UserCustomize, UserAppVersion, UserOnboard, UserReadNews, UserSessions
 from api.services.profiles import Profile, Achievements, Links, Link
 from api.services.game import Game
@@ -104,6 +106,10 @@ api.add_resource(UserSession, '/v1/auth/session')
 api.add_resource(emailAuth, '/v1/auth/emailAuth')
 api.add_resource(check2FAKey, '/v1/auth/check2FAKey')
 api.add_resource(resetPassword, '/v1/auth/changePassword')
+
+# OAuth
+api.add_resource(OAuthClient, '/v1/oauth/client/<clientId>')
+api.add_resource(OAuthToken, '/v1/oauth/token/<clientId>')
 
 # User Data
 api.add_resource(UserAccount, '/v1/user')
@@ -197,6 +203,7 @@ def loadConfigs(filename: str) -> None:
         'bad-maniac': BadManiac.updateConfig,
         'agx-server': AGXServer.updateConfig,
         'flask': UserSession.updateConfig,
+        'unity': UnityAPI.updateConfig,
     }
 
     for key, updater in configMap.items():

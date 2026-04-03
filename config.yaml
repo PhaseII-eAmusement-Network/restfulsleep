@@ -57,4 +57,10 @@ agx-server:
     marker-url: ''
     magic-key: ''
 
+unity:
+    server: 'http://localhost:2581'
+    app-id: 'unity'
+    psk: 'unity_security_key'
+    callback-url: 'http://localhost:5174/auth/callback'
+
 record_cache_dir: '/tmp'

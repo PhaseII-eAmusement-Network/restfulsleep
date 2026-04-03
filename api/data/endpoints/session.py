@@ -19,18 +19,18 @@ class SessionData:
 
     @staticmethod
     def createSession(opId: int, opType: str, expiration: int=(30 * 86400)) -> str:
-        session_token = ''.join(random.choice('0123456789ABCDEF') for _ in range(32))
-        expiration_time = int(time.time() + expiration)
+        sessionToken = ''.join(random.choice('0123456789ABCDEF') for _ in range(32))
+        expirationTime = int(time.time() + expiration)
 
         with MySQLBase.SessionLocal() as session:
-            while session.query(Session).filter(Session.session == session_token).first():
-                session_token = ''.join(random.choice('0123456789ABCDEF') for _ in range(32))
+            while session.query(Session).filter(Session.session == sessionToken).first():
+                sessionToken = ''.join(random.choice('0123456789ABCDEF') for _ in range(32))
             
-            new_session = Session(id=opId, session=session_token, type=opType, expiration=expiration_time)
-            session.add(new_session)
+            newSession = Session(id=opId, session=sessionToken, type=opType, expiration=expirationTime)
+            session.add(newSession)
             session.commit()
 
-            return session_token
+            return sessionToken
     
     @staticmethod
     def checkSession(sessionID: str) -> ValidatedDict:
@@ -73,24 +73,70 @@ class SessionData:
 
 class KeyData:
     @staticmethod
-    def createKey(opId: int, opType: str, expiration: int=(300)) -> str:
-        key_token = ''.join(random.choice('123456789') for _ in range(6))
-        expiration_time = int(time.time() + expiration)
+    def createKey(opId: int, opType: str, expiration: int=(300), length: int=6) -> str:
+        keyToken = ''.join(random.choice('123456789') for _ in range(length))
+        expirationTime = int(time.time() + expiration)
 
         with MySQLBase.SessionLocal() as session:
-            while session.query(Session).filter(Session.session == key_token).first():
-                key_token = ''.join(random.choice('123456789') for _ in range(6))
+            while session.query(Session).filter(Session.session == keyToken).first():
+                keyToken = ''.join(random.choice('123456789') for _ in range(length))
             
-            new_session = Session(id=opId, session=key_token, type=opType, expiration=expiration_time)
-            session.add(new_session)
+            newSession = Session(id=opId, session=keyToken, type=opType, expiration=expirationTime)
+            session.add(newSession)
             session.commit()
 
-            return key_token
+            return keyToken
     
     @staticmethod
     def checkKey(key: int, opType: str) -> ValidatedDict:
         with MySQLBase.SessionLocal() as session:
             userSession = session.query(Session).filter(Session.session == key, Session.type == opType).first()
+            
+            if userSession is not None:
+                current_time = int(time.time())
+                
+                if userSession.expiration > current_time:
+                    return ValidatedDict({
+                        'active': True,
+                        'id': int(userSession.id)
+                    })
+                else:
+                    return ValidatedDict({
+                        'active': False,
+                        'id': None 
+                    })
+            else:
+                return ValidatedDict({
+                    'active': False,
+                    'id': None 
+                })
+    
+    @staticmethod
+    def deleteKey(key: str, opType: str) -> None:
+        with MySQLBase.SessionLocal() as session:
+            session.query(Session).filter(Session.session == key, Session.type == opType).delete()
+            session.commit()
+
+class TokenData:
+    @staticmethod
+    def createToken(opId: int, opType: str, expiration: int=(300)) -> str:
+        newToken = ''.join(random.choice('0123456789ABCDEF') for _ in range(32))
+        expirationTime = int(time.time() + expiration)
+
+        with MySQLBase.SessionLocal() as session:
+            while session.query(Session).filter(Session.session == newToken).first():
+                newToken = ''.join(random.choice('0123456789ABCDEF') for _ in range(32))
+            
+            newSession = Session(id=opId, session=newToken, type=opType, expiration=expirationTime)
+            session.add(newSession)
+            session.commit()
+
+            return newToken
+    
+    @staticmethod
+    def checkToken(token: str, opType: str) -> ValidatedDict:
+        with MySQLBase.SessionLocal() as session:
+            userSession = session.query(Session).filter(Session.session == token, Session.type == opType).first()
             if userSession != None:
                 return ValidatedDict({
                     'active': True,
@@ -103,7 +149,7 @@ class KeyData:
                 })
     
     @staticmethod
-    def deleteKey(key: str, opType: str) -> None:
+    def deleteToken(token: str, opType: str) -> None:
         with MySQLBase.SessionLocal() as session:
-            session.query(Session).filter(Session.session == key, Session.type == opType).delete()
+            session.query(Session).filter(Session.session == token, Session.type == opType).delete()
             session.commit()
