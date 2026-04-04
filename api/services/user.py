@@ -29,7 +29,13 @@ class UserAccount(Resource):
             return args
         reqUserId = args.get_str('userId', None)
         if not reqUserId:
-            reqUserId = sessionUserId
+            reqUsername = args.get_str('username', None)
+            if reqUsername == None or reqUsername == "":
+                reqUserId = sessionUserId
+            else:
+                userQuery = UserData.getUserByName(reqUsername)
+                if userQuery:
+                    reqUserId = userQuery.get('id')
         else:
             try:
                 reqUserId = int(reqUserId)
@@ -92,6 +98,11 @@ class UserAccount(Resource):
         else:
             scoreStats = ScoreData.getUserStats(reqUserId)
 
+        reqUserData = reqUser.get_dict('data')
+        customize = reqUserData.get_dict('customize')
+        if not authUser:
+            reqUserData = {'customize': customize}
+
         return {
             'status': 'success',
             'data': {
@@ -103,7 +114,7 @@ class UserAccount(Resource):
                 'public': reqUser.get_bool('public'),
                 'avatar': member.get_str('avatar') if member else backup_avatar,
                 'discordRoles': member.get('roles') if member else None,
-                'data': reqUser.get_dict('data') if authUser else None,
+                'data': reqUserData,
                 'profiles': profiles,
                 'arcades': arcades,
                 'scoreStats': scoreStats

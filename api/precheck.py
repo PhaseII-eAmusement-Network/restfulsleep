@@ -27,7 +27,12 @@ class RequestPreCheck:
         return (True, session)
     
     def getAuthorization() -> Tuple[bool, ValidatedDict]:
-        unityKey = request.headers['X-Unity-Key']
+        unityKey = None
+        try:
+            unityKey = request.headers['X-Unity-Key']
+        except Exception as e:
+            return (False, APIConstants.badEnd(str(e)))
+        
         if unityKey:
             appId = 'unity'
             if unityKey != UnityAPI.UNITY_PSK:
@@ -41,12 +46,12 @@ class RequestPreCheck:
                 if bearer != 'Bearer':
                     return (False, APIConstants.softEnd('No Bearer provided!'))
             except Exception as e:
-                return (False, APIConstants.badEnd(e))
+                return (False, APIConstants.badEnd(str(e)))
 
             try:
                 token = SessionData.AES.decrypt(token)
             except Exception as e:
-                return (False, APIConstants.badEnd(e))
+                return (False, APIConstants.badEnd(str(e)))
 
             tokenData = TokenData.checkToken(token, f"{appId}_token")
             if not tokenData or tokenData.get('active') != True:
