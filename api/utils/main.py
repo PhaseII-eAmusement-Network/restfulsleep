@@ -25,7 +25,7 @@ from api.services.arcade import Arcade, ArcadeSettings, Paseli, VPN, CheckArcade
 from api.services.news import getAllNews, getNews
 from api.services.auth import UserSession, emailAuth, check2FAKey, resetPassword
 from api.services.oauth import OAuthClient, OAuthToken
-from api.services.user import UserAccount, UserUpdatePassword, UserCard, UserTakeover, UserPlayVideos, UserContent, UserCustomize, UserAppVersion, UserOnboard, UserReadNews, UserSessions
+from api.services.user import UserAccount, UserUpdatePassword, UserCard, UserTakeover, UserPlayVideos, UserContent, UserCustomize, UserAppVersion, UserOnboard, UserReadNews, UserSessions, UserMinified
 from api.services.profiles import Profile, Achievements, Links, Link
 from api.services.game import Game
 from api.services.music import Music
@@ -123,6 +123,7 @@ api.add_resource(UserAppVersion, '/v1/user/appVersion')
 api.add_resource(UserOnboard, '/v1/user/onboard')
 api.add_resource(UserReadNews, '/v1/user/readNews')
 api.add_resource(UserSessions, '/v1/user/sessions')
+api.add_resource(UserMinified, '/v1/user/minified')
 
 # Integration callbacks
 api.add_resource(IntegrateDiscord, '/v1/user/integrate/discord')

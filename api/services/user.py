@@ -774,3 +774,68 @@ class UserSessions(Resource):
             return {'status': 'success'}
         except:
             return APIConstants.badEnd('Failed to delete sessions')
+
+class UserMinified(Resource):
+    def get(self):
+        '''
+        Loads a user's account based on ID or a User Auth Key.
+        If given a user ID, only return a user's public info. Otherwise, return everything.
+        '''
+        sessionState, session = RequestPreCheck.getSession()
+        if not sessionState:
+            return session
+        sessionUserId = session.get_int('id')
+        sessionUser = UserData.getUser(sessionUserId)
+
+        argsState, args = RequestPreCheck.checkArgs()
+        if not argsState:
+            return args
+        reqUserId = args.get_str('userId', None)
+        if not reqUserId:
+            reqUsername = args.get_str('username', None)
+            if reqUsername == None or reqUsername == "":
+                reqUserId = sessionUserId
+            else:
+                userQuery = UserData.getUserByName(reqUsername)
+                if userQuery:
+                    reqUserId = userQuery.get('id')
+        else:
+            try:
+                reqUserId = int(reqUserId)
+            except:
+                return APIConstants.badEnd('Failed to load a userId.')
+            
+        reqUser = UserData.getUser(reqUserId)
+        if not reqUser:
+            return APIConstants.badEnd('No user found.')
+        
+        authUser = True if sessionUserId == reqUserId else False
+        if sessionUser.get_bool('admin'):
+            authUser = True
+
+        if reqUser.get_bool('banned') and not sessionUser.get_bool('admin'):
+            return APIConstants.badEnd('You\'re banned.' if authUser else 'This user is banned.')
+        
+        if not authUser:
+            if not reqUser.get_bool('public'):
+                return APIConstants.badEnd('This is a private profile.')
+
+        reqUserData = reqUser.get_dict('data')
+        discordLink = reqUserData.get_dict('discord')
+        backup_avatar = None
+        if discordLink.get_bool('linked'):
+            backup_avatar = f"https://cdn.discordapp.com/avatars/{discordLink.get('id')}/{discordLink.get('avatar')}"
+
+        return {
+            'status': 'success',
+            'data': {
+                'id': reqUser.get_int('id'),
+                'name': reqUser.get_str('username'),
+                'email': reqUser.get_str('email') if authUser else None,
+                'admin': reqUser.get_bool('admin'),
+                'banned': reqUser.get_bool('banned'),
+                'public': reqUser.get_bool('public'),
+                'avatar': backup_avatar,
+            }
+        }
+    
