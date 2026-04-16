@@ -6,15 +6,15 @@ from api.data.endpoints.user import UserData
 from api.external.unity import UnityAPI
 
 class RequestPreCheck:
-    def getSession() -> Tuple[bool, ValidatedDict]:
+    def getSession(allowApi: bool = False) -> Tuple[bool, ValidatedDict]:
         sessionId = request.cookies.get('User-Auth-Key')
-        appId = None
         if not sessionId:
             # Attempt to check for a bearer token and app ID
-            auth = RequestPreCheck.getAuthorization()
-            if auth:
-                return auth
-            return (False, APIConstants.softEnd('No User-Auth-Key provided!'))
+            if allowApi:
+                auth = RequestPreCheck.getAuthorization()
+                if auth:
+                    return auth
+            return (False, APIConstants.softEnd('No User-Auth-Key provided or oAuth is Unauthorized!'))
         
         decryptedSession = SessionData.AES.decrypt(sessionId)
         if not decryptedSession:
@@ -26,38 +26,63 @@ class RequestPreCheck:
 
         return (True, session)
     
-    def getAuthorization() -> Tuple[bool, ValidatedDict]:
+    def getAuthorization(noBearer: bool = False) -> Tuple[bool, ValidatedDict]:
         unityKey = None
         try:
             unityKey = request.headers['X-Unity-Key']
         except Exception as e:
-            return (False, APIConstants.badEnd(str(e)))
+            pass
+
+        apiKey = None
+        apiId = None
+        intentBits = 0
+        try:
+            apiKey = request.headers['X-API-Key']
+            apiId = request.headers['X-AUTH-ID']
+        except Exception as e:
+            pass
+
+        if unityKey == None and (apiKey == None or apiId == None):
+            return (False, APIConstants.badEnd("Failed to find `X-API-Key` or `X-AUTH-ID` header"))
         
         if unityKey:
-            appId = 'unity'
+            apiId = 'unity'
             if unityKey != UnityAPI.UNITY_PSK:
                 return (False, APIConstants.softEnd('X-Unity-Key provided is incorrect'))
-            
+        else:
+            authState, authData = UnityAPI.check_app_auth(apiId, apiKey)
+            if not authState:
+                return authData
+            intentBits = authData.get_int('intents')
+
+        if noBearer:
+            return (True, {'id': -1, 'apiId': apiId, 'intents': intentBits})
+        
+        try:
             authorization = request.headers['Authorization']
-            if not authorization:
-                return (False, APIConstants.softEnd('No Authorization provided!'))
-            try:
-                bearer, token = authorization.split(' ')
-                if bearer != 'Bearer':
-                    return (False, APIConstants.softEnd('No Bearer provided!'))
-            except Exception as e:
-                return (False, APIConstants.badEnd(str(e)))
+        except Exception as e:
+            return (False, APIConstants.badEnd("Failed to find `Authorization` header"))
+        if not authorization:
+            return (False, APIConstants.softEnd('No Authorization provided!'))
+        try:
+            bearer, token = authorization.split(' ')
+            if bearer != 'Bearer':
+                return (False, APIConstants.softEnd('No Bearer provided!'))
+        except Exception as e:
+            return (False, APIConstants.badEnd(str(e)))
 
-            try:
-                token = SessionData.AES.decrypt(token)
-            except Exception as e:
-                return (False, APIConstants.badEnd(str(e)))
+        try:
+            token = SessionData.AES.decrypt(token)
+        except Exception as e:
+            return (False, APIConstants.badEnd(str(e)))
 
-            tokenData = TokenData.checkToken(token, f"{appId}_token")
-            if not tokenData or tokenData.get('active') != True:
-                return (False, APIConstants.badEnd('No token found!'))
-            tokenData['authorization_token'] = token
-            return (True, tokenData)
+        tokenData = TokenData.checkToken(token, f"{apiId}_token")
+        if not tokenData or tokenData.get('active') != True:
+            return (False, APIConstants.badEnd('No token found!'))
+        tokenData['authorization_token'] = token
+        tokenData['intents'] = intentBits
+        tokenData['apiId'] = apiId
+        return (True, tokenData)
     
     def checkAdmin(session: ValidatedDict) -> Tuple[bool, ValidatedDict]:
         '''

@@ -60,3 +60,27 @@ class MailjetSMTP:
             return None
         except Exception as e:
             return str(e)
+        
+    def oAuthUsed(self, toEmail: str, application_name: str):
+        '''
+        Given a user's email, send a warning.
+        '''
+        now = datetime.now()
+        string_format = now.strftime("%Y-%m-%d %H:%M:%S")
+
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = self.address
+            msg['To'] = toEmail
+            msg['Subject'] = "Your PhaseII account was used for oAuth"
+            email_body = f"You successfully signed into {application_name} via oAuth using your PhaseII account on {string_format}.\n\nIf this was not you, please contact a staff member IMMEDIATELY."
+            msg.attach(MIMEText(email_body, 'plain'))
+
+            with smtplib.SMTP(self.server, 587) as server:
+                server.starttls()
+                server.login(self.username, self.password)
+                server.sendmail(self.address, toEmail, msg.as_string())
+
+            return None
+        except Exception as e:
+            return str(e)

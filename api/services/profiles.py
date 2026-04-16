@@ -12,7 +12,7 @@ from api.data.endpoints.links import LinkData
 
 class Profile(Resource):
     def get(self, game: str):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         
@@ -90,7 +90,7 @@ class Profile(Resource):
     
 class Achievements(Resource):
     def get(self, game: str):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         
@@ -140,7 +140,7 @@ class Achievements(Resource):
 
 class Links(Resource):
     def get(self, game: str):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         

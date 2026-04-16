@@ -7,7 +7,7 @@ from api.constants import APIConstants
 
 class Music(Resource):
     def get(self):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         

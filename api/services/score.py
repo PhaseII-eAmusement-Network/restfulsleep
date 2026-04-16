@@ -7,7 +7,7 @@ from api.data.endpoints.score import ScoreData
 
 class Records(Resource):
     def get(self, game: str):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         
@@ -27,7 +27,7 @@ class Records(Resource):
     
 class Attempts(Resource):
     def get(self, game):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         
@@ -54,7 +54,7 @@ class Attempts(Resource):
     
 class TopScore(Resource):
     def get(self, game: str, songId: int):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         

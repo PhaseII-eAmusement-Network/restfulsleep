@@ -6,7 +6,7 @@ from api.data.endpoints.news import NewsData
 
 class getAllNews(Resource):
     def get(self):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         
@@ -26,7 +26,7 @@ class getAllNews(Resource):
 
 class getNews(Resource):
     def get(self, newsId):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         

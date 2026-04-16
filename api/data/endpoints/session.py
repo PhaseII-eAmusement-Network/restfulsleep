@@ -78,12 +78,16 @@ class KeyData:
         expirationTime = int(time.time() + expiration)
 
         with MySQLBase.SessionLocal() as session:
-            while session.query(Session).filter(Session.session == keyToken).first():
-                keyToken = ''.join(random.choice('123456789') for _ in range(length))
-            
-            newSession = Session(id=opId, session=keyToken, type=opType, expiration=expirationTime)
-            session.add(newSession)
-            session.commit()
+            try:
+                while session.query(Session).filter(Session.session == keyToken).first():
+                    keyToken = ''.join(random.choice('123456789') for _ in range(length))
+                
+                newSession = Session(id=opId, session=keyToken, type=opType, expiration=expirationTime)
+                session.add(newSession)
+                session.commit()
+            except Exception as e:
+                print(e)
+                return None
 
             return keyToken
     

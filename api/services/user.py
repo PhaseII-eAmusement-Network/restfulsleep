@@ -11,6 +11,7 @@ from api.data.endpoints.profiles import ProfileData
 from api.data.endpoints.game import GameData
 from api.data.endpoints.score import ScoreData
 from api.external.badmaniac import BadManiac
+from api.external.unity import UnityAPI
 
 class UserAccount(Resource):
     def get(self):
@@ -18,9 +19,10 @@ class UserAccount(Resource):
         Loads a user's account based on ID or a User Auth Key.
         If given a user ID, only return a user's public info. Otherwise, return everything.
         '''
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
+        apiId = session.get_str('apiId', None)
         sessionUserId = session.get_int('id')
         sessionUser = UserData.getUser(sessionUserId)
 
@@ -114,7 +116,7 @@ class UserAccount(Resource):
                 'public': reqUser.get_bool('public'),
                 'avatar': member.get_str('avatar') if member else backup_avatar,
                 'discordRoles': member.get('roles') if member else None,
-                'data': reqUserData,
+                'data': reqUserData if (apiId == None) or (apiId == UnityAPI.UNITY_APP_ID) else {},
                 'profiles': profiles,
                 'arcades': arcades,
                 'scoreStats': scoreStats

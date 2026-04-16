@@ -17,6 +17,70 @@ class APIConstants:
     
     def softEnd(error: str) -> dict:
         return {'status': 'warn', 'error_code': error}
+
+class AppIntents:
+    NETWORK = 1 << 0
+    READ_USER = 1 << 1
+    UPDATE_USER = 1 << 2
+    READ_PROFILES = 1 << 3
+    UPDATE_PROFILES = 1 << 4
+    READ_SCORES = 1 << 5
+    READ_ARCADE = 1 << 6
+    UPDATE_ARCADE = 1 << 7
+    WEBHOOK = 1 << 8
+
+    INTENT_MAP = {
+        "network": NETWORK,
+        "read_user": READ_USER,
+        "update_user": UPDATE_USER,
+        "read_profiles": READ_PROFILES,
+        "update_profiles": UPDATE_PROFILES,
+        "read_scores": READ_SCORES,
+        "read_arcade": READ_ARCADE,
+        "update_arcade": UPDATE_ARCADE,
+        "webhook": WEBHOOK,
+    }
+
+    @staticmethod
+    def maxIntents() -> int:
+        bitmask = 0
+        for value in AppIntents.INTENT_MAP.values():
+            bitmask |= value
+        return bitmask
+
+    def buildIntentsBitmask(intentDict: dict) -> int:
+        bitmask = 0
+
+        for key, enabled in intentDict.items():
+            if key not in AppIntents.INTENT_MAP:
+                raise ValueError(f"Invalid intent: {key}")
+            
+            if enabled:
+                bitmask |= AppIntents.INTENT_MAP[key]
+
+        return bitmask
+    
+    def reverseIntentsBitmask(bitmask: int) -> dict:
+        intentsDict = {}
+        for intentName, intentValue in AppIntents.INTENT_MAP.items():
+            if bitmask & intentValue:
+                intentsDict[intentName] = True
+            else:
+                intentsDict[intentName] = False
+        
+        return intentsDict
+    
+    def hasIntents(bitmask: int, **kwargs) -> bool:
+        for intentName, expected in kwargs.items():
+            if intentName not in AppIntents.INTENT_MAP:
+                raise ValueError(f"Invalid intent: {intentName}")
+
+            intentValue = AppIntents.INTENT_MAP[intentName]
+            isSet = bool(bitmask & intentValue)
+
+            if isSet != expected:
+                return False
+        return True
     
 class GameConstants:
     BEATSTREAM = 'bst'
