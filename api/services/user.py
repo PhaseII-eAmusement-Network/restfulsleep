@@ -586,7 +586,7 @@ class UserPlayVideos(Resource):
     Handle loading, and deletion of a user's play videos. Requires the auth header for a user.
     '''
     def get(self):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         
@@ -604,7 +604,7 @@ class UserContent(Resource):
     Handle loading, and deletion of a user's content. Requires the auth header for a user.
     '''
     def get(self):
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         
@@ -783,7 +783,7 @@ class UserMinified(Resource):
         Loads a user's account based on ID or a User Auth Key.
         If given a user ID, only return a user's public info. Otherwise, return everything.
         '''
-        sessionState, session = RequestPreCheck.getSession()
+        sessionState, session = RequestPreCheck.getSession(allowApi=True)
         if not sessionState:
             return session
         sessionUserId = session.get_int('id')
