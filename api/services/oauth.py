@@ -43,7 +43,7 @@ class OAuthClient(Resource):
         appState, app = UnityAPI.get_app_from_id(clientId)
         if not appState:
             return app
-        code = KeyData.createKey(session.get_int('id'), f'oauth_{app.get_str('oauthId')}_code', length=15)
+        code = KeyData.createKey(session.get_int('id'), f'oauth_{app.get_str("oauthId")}_code', length=15)
         if code == None:
             return APIConstants.badEnd("Failed to create code")
 
