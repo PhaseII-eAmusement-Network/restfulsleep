@@ -123,7 +123,7 @@ class ProfileData:
                 Refid.userId == userId,
                 Refid.game == game,
                 (Refid.version < 10000)
-            ).all()
+            ).order_by(Refid.version.asc()).all()
 
             if refid_query:
                 return [refid.version for refid in refid_query]
