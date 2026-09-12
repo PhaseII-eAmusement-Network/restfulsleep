@@ -15,6 +15,8 @@ class Music(Resource):
         version = request.args.get('version')
         songIds = request.headers.get('songIds')
         oneChart = request.args.get('oneChart')
+        if songIds == None:
+            songIds = request.args.get('songIds')
 
         if not version:
             return APIConstants.badEnd('No version provided!')
@@ -27,6 +29,8 @@ class Music(Resource):
             filteredSongIds = []
             for songId in songIds.split(','):
                 filteredSongIds.append(int(songId))
+
+        print(songIds)
             
         filteredVersion = int(version)
         data = MusicData.getAllMusic(game = game, version = filteredVersion, song_ids = filteredSongIds, chart = 0 if oneChart else None)

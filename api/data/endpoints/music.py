@@ -23,7 +23,14 @@ def _latest_version_subquery(session, game, song_ids=None):
 
 class MusicData:
     @staticmethod
-    def getAllMusic(game: str = None, version: int = None, limit: int = None, chart: int = None, song_ids: list[int] = None) -> list[dict]:
+    def getAllMusic(
+        game: str = None,
+        version: int = None,
+        limit: int = None,
+        chart: int = None,
+        song_ids: list[int] = None
+    ) -> list[dict]:
+
         cacheName = f'music_{game}_{version}'
         musicData = None
         if not song_ids:
@@ -31,18 +38,21 @@ class MusicData:
 
         if not musicData:
             with MySQLBase.SessionLocal() as session:
-                musicQuery = (
-                    session.query(Music)
-                    .filter(Music.game == game, Music.songid.in_(song_ids) if song_ids else True, Music.chart == chart if chart else True)
-                    .order_by(Music.songid.desc())
-                )
+                musicQuery = session.query(Music).filter(Music.game == game)
+                if song_ids:
+                    musicQuery = musicQuery.filter(Music.songid.in_(song_ids))
+
+                if chart:
+                    musicQuery = musicQuery.filter(Music.chart == chart)
 
                 if version is not None:
                     musicQuery = musicQuery.filter(Music.version == version)
 
+                musicQuery = musicQuery.order_by(Music.songid.desc())
+                if limit:
+                    musicQuery = musicQuery.limit(limit)
                 result = musicQuery.all()
 
-            # To ensure unique (db_id, chart) pairs
             seen = set()
             musicData = []
             for song in result:
