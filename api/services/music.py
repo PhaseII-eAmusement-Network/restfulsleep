@@ -29,8 +29,6 @@ class Music(Resource):
             filteredSongIds = []
             for songId in songIds.split(','):
                 filteredSongIds.append(int(songId))
-
-        print(songIds)
             
         filteredVersion = int(version)
         data = MusicData.getAllMusic(game = game, version = filteredVersion, song_ids = filteredSongIds, chart = 0 if oneChart else None)
