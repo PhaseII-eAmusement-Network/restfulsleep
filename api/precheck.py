@@ -51,7 +51,7 @@ class RequestPreCheck:
         else:
             authState, authData = UnityAPI.check_app_auth(apiId, apiKey)
             if not authState:
-                return authData
+                return (False, APIConstants.softEnd(authData['error_code']))
             intentBits = authData.get_int('intents')
 
         if noBearer:
