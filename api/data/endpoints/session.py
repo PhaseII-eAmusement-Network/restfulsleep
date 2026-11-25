@@ -114,6 +114,17 @@ class KeyData:
                     'active': False,
                     'id': None 
                 })
+
+    @staticmethod
+    def checkActive(opId: int, opType: str) -> ValidatedDict:
+        with MySQLBase.SessionLocal() as session:
+            userSessions = session.query(Session.expiration).filter(Session.id == opId, Session.type == opType).all()
+            currentTime = int(time.time())
+            for userSession in userSessions:        
+                if userSession.expiration > currentTime:
+                    return True
+            
+            return False
     
     @staticmethod
     def deleteKey(key: str, opType: str) -> None:

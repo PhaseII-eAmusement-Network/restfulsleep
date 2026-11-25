@@ -112,6 +112,10 @@ class emailAuth(Resource):
         
         if user.get_bool('banned'):
             return APIConstants.badEnd('You\'re banned.')
+
+        existingKey = KeyData.checkActive(user.get_int('id'), 'auth_key')
+        if existingKey:
+            return APIConstants.badEnd('Your key hasn\'t expired!')
         
         authKey = KeyData.createKey(user.get_int('id'), 'auth_key')
         errorState = MailjetSMTP().sendAuthKey(user.get_str('email'), authKey)
